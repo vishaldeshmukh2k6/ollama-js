@@ -125,19 +125,19 @@ function getPlatform(): string {
  */
 function normalizeHeaders(headers?: HeadersInit | undefined): Record<string, string> {
   if (headers instanceof Headers) {
-    // If headers are an instance of Headers, convert it to an object
     const obj: Record<string, string> = {}
     headers.forEach((value, key) => {
-      obj[key] = value
+      obj[key.toLowerCase()] = value
     })
     return obj
   } else if (Array.isArray(headers)) {
-    // If headers are in array format, convert them to an object
-    return Object.fromEntries(headers)
-  } else {
-    // Otherwise assume it's already a plain object
-    return headers || {}
+    return Object.fromEntries(headers.map(([k, v]) => [k.toLowerCase(), v]))
+  } else if (headers) {
+    return Object.fromEntries(
+      Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v])
+    )
   }
+  return {}
 }
 
 const readEnvVar = (obj: object, key: string): string | undefined => {
@@ -157,15 +157,13 @@ const fetchWithHeaders = async (
   options: RequestInit = {},
 ): Promise<Response> => {
   const defaultHeaders = {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-    'User-Agent': `ollama-js/${version} (${getPlatform()})`,
-  } as HeadersInit
+    'content-type': 'application/json',
+    'accept': 'application/json',
+    'user-agent': `ollama-js/${version} (${getPlatform()})`,
+  }
 
-  // Normalizes headers into a plain object format.
   options.headers = normalizeHeaders(options.headers)
 
-  // Automatically add the API key to the headers if the URL is https://ollama.com
   try {
     const parsed = new URL(url)
     if (parsed.protocol === 'https:' && parsed.hostname === 'ollama.com') {
@@ -176,10 +174,8 @@ const fetchWithHeaders = async (
         process.env !== null
           ? readEnvVar(process.env, 'OLLAMA_API_KEY')
           : undefined
-      const authorization =
-        options.headers['authorization'] || options.headers['Authorization']
-      if (!authorization && apiKey) {
-        options.headers['Authorization'] = `Bearer ${apiKey}`
+      if (!options.headers['authorization'] && apiKey) {
+        options.headers['authorization'] = `Bearer ${apiKey}`
       }
     }
   } catch (error) {
@@ -188,11 +184,8 @@ const fetchWithHeaders = async (
 
   const customHeaders = Object.fromEntries(
     Object.entries(options.headers).filter(
-      ([key]) =>
-        !Object.keys(defaultHeaders).some(
-          (defaultKey) => defaultKey.toLowerCase() === key.toLowerCase(),
-        ),
-    ),
+      ([key]) => !defaultHeaders.hasOwnProperty(key)
+    )
   )
 
   options.headers = {
