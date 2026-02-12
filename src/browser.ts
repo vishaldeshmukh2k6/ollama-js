@@ -73,7 +73,7 @@ export class Ollama {
    */
   protected async processStreamableRequest<T extends object>(
     endpoint: string,
-    request: { stream?: boolean } & Record<string, any>,
+    request: Record<string, unknown> & { stream?: boolean },
   ): Promise<T | AbortableAsyncIterator<T>> {
     request.stream = request.stream ?? false
     const host = `${this.config.host}/api/${endpoint}`

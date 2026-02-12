@@ -33,7 +33,11 @@ describe('get Function Header Tests', () => {
     await get(mockFetch, 'http://example.com', { headers: customHeaders });
 
     expect(mockFetch).toHaveBeenCalledWith('http://example.com', {
-      headers: expect.objectContaining(defaultHeaders)
+      headers: expect.objectContaining({
+        ...defaultHeaders,
+        'authorization': 'Bearer token',
+        'x-custom': 'value'
+      })
     });
   });
 
@@ -46,7 +50,11 @@ describe('get Function Header Tests', () => {
     await get(mockFetch, 'http://example.com', { headers: customHeaders });
 
     expect(mockFetch).toHaveBeenCalledWith('http://example.com', {
-      headers: expect.objectContaining(defaultHeaders)
+      headers: expect.objectContaining({
+        ...defaultHeaders,
+        'authorization': 'Bearer token',
+        'x-custom': 'value'
+      })
     });
   });
 

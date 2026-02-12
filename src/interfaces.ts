@@ -45,7 +45,7 @@ export interface Options {
   stop: string[]
 }
 
-export interface GenerateRequest {
+export interface GenerateRequest extends Record<string, unknown> {
   model: string
   prompt: string
   suffix?: string
@@ -81,9 +81,7 @@ export interface Message {
 export interface ToolCall {
   function: {
     name: string;
-    arguments: {
-      [key: string]: any;
-    };
+    arguments: Record<string, unknown>;
   };
 }
 
@@ -95,22 +93,20 @@ export interface Tool {
     type?: string;
     parameters?: {
       type?: string;
-      $defs?: any;
-      items?: any;
+      $defs?: Record<string, unknown>;
+      items?: Record<string, unknown>;
       required?: string[];
-      properties?: {
-        [key: string]: {
-          type?: string | string[];
-          items?: any;
-          description?: string;
-          enum?: any[];
-        };
-      };
+      properties?: Record<string, {
+        type?: string | string[];
+        items?: Record<string, unknown>;
+        description?: string;
+        enum?: unknown[];
+      }>;
     };
   };
 }
 
-export interface ChatRequest {
+export interface ChatRequest extends Record<string, unknown> {
   model: string
   messages?: Message[]
   stream?: boolean
@@ -278,9 +274,9 @@ export interface ShowResponse {
   details: ModelDetails
   messages: Message[]
   modified_at: Date
-  model_info: Map<string, any>,
-  capabilities: string[],
-  projector_info?: Map<string, any>
+  model_info: Record<string, unknown>
+  capabilities: string[]
+  projector_info?: Record<string, unknown>
 }
 
 export interface VersionResponse {

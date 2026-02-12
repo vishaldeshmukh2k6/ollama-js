@@ -50,7 +50,7 @@ export class AbortableAsyncIterator<T extends object> {
       yield message
       // message will be done in the case of chat and generate
       // message will be success in the case of a progress response (pull, push, create)
-      if ((message as any).done || (message as any).status === 'success') {
+      if ('done' in message && message.done || 'status' in message && message.status === 'success') {
         this.doneCallback()
         return
       }
@@ -97,8 +97,7 @@ const checkOk = async (response: Response): Promise<void> => {
  */
 function getPlatform(): string {
   if (typeof window !== 'undefined' && window.navigator) {
-    // Need type assertion here since TypeScript doesn't know about userAgentData
-    const nav = navigator as any
+    const nav = navigator as { userAgentData?: { platform?: string } }
     if ('userAgentData' in nav && nav.userAgentData?.platform) {
       return `${nav.userAgentData.platform.toLowerCase()} Browser/${navigator.userAgent};`
     }
@@ -184,7 +183,7 @@ const fetchWithHeaders = async (
 
   const customHeaders = Object.fromEntries(
     Object.entries(options.headers).filter(
-      ([key]) => !defaultHeaders.hasOwnProperty(key)
+      ([key]) => !Object.prototype.hasOwnProperty.call(defaultHeaders, key)
     )
   )
 
@@ -244,7 +243,7 @@ export const post = async (
   data?: Record<string, unknown> | BodyInit,
   options?: { signal?: AbortSignal; headers?: HeadersInit },
 ): Promise<Response> => {
-  const isRecord = (input: any): input is Record<string, unknown> => {
+  const isRecord = (input: unknown): input is Record<string, unknown> => {
     return input !== null && typeof input === 'object' && !Array.isArray(input)
   }
 
